@@ -9,7 +9,7 @@ namespace :db do
         Dir[Rails.root.join('db/diagrams/*.dot')].each do |fn|
           fn = Pathname(fn)
           out_fn = out_dir.join(fn.basename.sub_ext('.ps'))
-          `#{cmd} #{fn} -o#{out_fn} -Tps2`
+          `#{cmd} '#{fn}' -o '#{out_fn}' -Tps2`
         end
         puts "Output has been generated in #{out_dir}"
       end

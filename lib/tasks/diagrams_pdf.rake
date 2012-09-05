@@ -10,7 +10,7 @@ namespace :db do
         Dir[in_dir.join('*.ps')].each do |fn|
           fn = Pathname(fn)
           out_fn = out_dir.join(fn.basename.sub_ext('.pdf'))
-          `ps2pdf #{fn} #{out_fn}`
+          `ps2pdf '#{fn}' '#{out_fn}'`
         end
         puts "Output has been generated in #{out_dir}"
       end
