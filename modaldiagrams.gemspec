@@ -14,13 +14,27 @@ Gem::Specification.new do |s|
   s.email = "jgoizueta@gmail.com"
   s.extra_rdoc_files = [
     "LICENSE.txt",
-    "README.md",
     "README.rdoc",
     "TODO"
   ]
   s.files = [
-    "README.md",
-    "VERSION"
+    "Gemfile",
+    "Gemfile.lock",
+    "LICENSE.txt",
+    "README.rdoc",
+    "Rakefile",
+    "TODO",
+    "VERSION",
+    "lib/modaldiagrams.rb",
+    "lib/modaldiagrams/modaldiagrams.rb",
+    "lib/modaldiagrams/parameters.rb",
+    "lib/modaldiagrams/tasks.rb",
+    "lib/tasks.rb",
+    "lib/tasks/diagrams.rake",
+    "lib/tasks/diagrams_pdf.rake",
+    "lib/tasks/diagrams_png.rake",
+    "lib/tasks/diagrams_ps.rake",
+    "modaldiagrams.gemspec"
   ]
   s.homepage = "http://github.com/jgoizueta/modaldiagrams"
   s.licenses = ["MIT"]
