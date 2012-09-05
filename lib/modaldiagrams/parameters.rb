@@ -13,7 +13,7 @@ module ModalDiagrams
       :unified_polymorphic => false,             # unify the circled end of polymorphic associations
       :no_association_labels=>false,             # don't show association labels
       :output_tools => %w{dot fdp neato}         # graphviz styles (tools) used whe generating output (ps/png/pdf)
-    ].merge Settings.load(Rails.root.join('config','db_diagram.yml'))
+    ].merge Settings.load(Rails.root.join('config','modal_diagrams.yml'))
   end
 
 end

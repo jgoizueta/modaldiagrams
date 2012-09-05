@@ -1,5 +1,5 @@
 # ActiveRecord DB Diagrams
-# Configuration parameters can be changed by writing a file named config/db_diagram.yml
+# Configuration parameters can be changed by writing a file named config/modal_diagrams.yml
 
 module ModalDiagrams
 
