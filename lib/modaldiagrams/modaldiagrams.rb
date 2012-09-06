@@ -1,6 +1,9 @@
 # ActiveRecord DB Diagrams
 # Configuration parameters can be changed by writing a file named config/modal_diagrams.yml
 
+require 'modalsettings'
+require 'modalsupport'
+
 module ModalDiagrams
 
   # Field type abbreviations
@@ -43,7 +46,13 @@ module ModalDiagrams
       cluster_classes = {} # assoc cluster name to array of class names
       relation_classes = [] # each element is the 2-element array of class names of the corresponding relation in relations
 
-      models = dbmodels
+      model_selection_options = {
+          :all_models => cfg.include_all_models,
+          :dynamic_models => cfg.include_dynamic_models,
+          :include_files => false
+      }
+
+      models = dbmodels(model_selection_options.merge(:exclude_sti_models => true))
 
       models.each do |cls|
         if cls.respond_to?(:reflect_on_all_associations) && ActiveRecord::Base.connection.table_exists?(cls.table_name)
@@ -144,6 +153,7 @@ module ModalDiagrams
       end
 
       if cfg.show_sti
+        sti_classes = dbmodels(model_selection_options.merge(:exclude_non_sti_models => true))
         sti_classes.each do |sti_class|
           cls = sti_class.base_class
           if cls.respond_to?(:cluster)
@@ -202,26 +212,74 @@ module ModalDiagrams
 
     private
 
-    # return ActiveRecord classes corresponding to tables, without STI derived classes, but including indirectly
-    # derived classes that do have their own tables (to achieve this we use the convention that in such cases
-    # the base class, directly derived from ActiveRecord::Base has a nil table_name)
-    def dbmodels
-      models = Dir.glob(File.join(Rails.root,"app/models/**/*.rb"))\
-                 .map{|f| File.basename(f).chomp(".rb").camelize.constantize}\
-                 .select{|c| has_table(c)}\
-                 .reject{|c| has_table(c.superclass)}
-      models += ActiveRecord::Base.send(:subclasses).reject{|c| c.name.starts_with?('CGI::') || !has_table(c) || has_table(c.superclass)}
-      models.uniq
+    # Return the database models
+    # Options:
+    #   :all_models                # Return also models in plugins, not only in the app (app/models)
+    #   :dynamic_models            # Return dynamically defined models too (not defined in a model file)
+    #   :exclude_sti_models        # Exclude derived (STI) models
+    #   :exclude_non_sti_models    # Exclude top level models
+    #   :include_files             # Return also the model definition file pathnames (return pairs of [model, file])
+    #   :only_app_files            #   But return nil for files not in the app proper
+    #   :only_app_tree_files       #   But return nil for files not in the app directory tree (app, vendor...)
+    def dbmodels(options={})
+
+      models_dir = 'app/models'
+      if Rails.respond_to?(:application)
+        models_dir = Rails.application.paths[models_dir]
+      end
+      models_dir = Rails.root.join(models_dir)
+
+      if options[:all_models]
+        # Include also models from plugins
+        model_dirs = $:.grep(/\/models\/?\Z/)
+      else
+        # Only main application models
+        model_dirs = [models_dir]
+      end
+
+      models = []
+      files = {}
+      model_dirs.each do |base|
+        Dir.glob(File.join(base,"**/*.rb")).each do |fn|
+          model = File.basename(fn).chomp(".rb").camelize.constantize
+          models << model
+          files[model.to_s] = fn
+        end
+      end
+      models = models.sort_by{|m| m.to_s}
+
+      if options[:dynamic_models]
+        # Now add dynamically generated models (not having dedicated files)
+        # note that subclasses of these models are not added here
+        models += ActiveRecord::Base.send(:subclasses)
+        models = models.uniq
+      end
+
+      models = models.uniq.reject{|model| !has_table?(model)}
+
+      non_sti_models, sti_models = models.partition{|model| model.base_class==model}
+
+      models = []
+      models += non_sti_models unless options[:exclude_non_sti_models]
+      models += sti_models unless options[:exclude_sti_models]
+      if options[:include_files]
+        models = models.map{|model| [model, files[model.to_s]]}
+        if options[:only_app_files] || options[:only_app_tree_files]
+          if options[:only_app_files]
+            suffix = models_dir.to_s
+          else
+            suffix = Rails.root.to_s
+          end
+          suffix += '/' unless suffix.ends_with?('/')
+          models = models.map{|model, file| [model, file && (file.starts_with?(suffix) ? file : nil)]}
+        end
+      end
+      models
     end
 
-    def sti_classes
-      models = Dir.glob(File.join(Rails.root,"app/models/**/*.rb"))\
-                 .map{|f| File.basename(f).chomp(".rb").camelize.constantize}\
-                 .select{|c| has_table(c) && c.base_class!=c}
-      models += ActiveRecord::Base.send(:subclasses).reject{|c| c.name.starts_with?('CGI::') || !has_table(c)}.select{|c| has_table(c) && c.base_class!=c}
-      models.uniq
+    def has_table?(cls)
+     (cls != ActiveRecord::Base) && cls.respond_to?(:table_name) && cls.table_name.present?
     end
-
     def assoc_foreign_key(assoc)
       # Up to ActiveRecord 3.1 we had primary_key_name in AssociationReflection; not it is foreign_key
       assoc.respond_to?(:primary_key_name) ? assoc.primary_key_name : assoc.foreign_key

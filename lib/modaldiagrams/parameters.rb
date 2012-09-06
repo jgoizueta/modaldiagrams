@@ -3,6 +3,8 @@ module ModalDiagrams
   def self.parameters
     @settings ||= Settings[
       # Default values
+      :include_all_models => false,              # include models defined in plugins
+      :include_dynamic_models => false,          # include models defined dynamically (not in model files)
       :max_attributes => 24,                     # maximum number of attributes shown in a class (table)
       :clusters_not_shown_on_main_diagram => [], # clusters not shown in the main diagram
       :show_external => true,                    # show associations to classes from other clusters in cluster diagrams
