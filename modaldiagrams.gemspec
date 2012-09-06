@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = "modaldiagrams"
-  s.version = "1.0.1"
+  s.version = "1.1.0"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Javier Goizueta"]
-  s.date = "2012-09-05"
+  s.date = "2012-09-06"
   s.description = "modaldiagrams provides Rake tasks for diagramming ActiveRecord databases. It generates Graphviz dot files."
   s.email = "jgoizueta@gmail.com"
   s.extra_rdoc_files = [
@@ -31,6 +31,7 @@ Gem::Specification.new do |s|
     "lib/modaldiagrams/tasks.rb",
     "lib/tasks.rb",
     "lib/tasks/diagrams.rake",
+    "lib/tasks/diagrams_clean.rake",
     "lib/tasks/diagrams_pdf.rake",
     "lib/tasks/diagrams_png.rake",
     "lib/tasks/diagrams_ps.rake",
