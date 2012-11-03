@@ -225,16 +225,16 @@ module ModalDiagrams
 
       models_dir = 'app/models'
       if Rails.respond_to?(:application)
-        models_dir = Rails.application.paths[models_dir]
+        model_dirs = Rails.application.paths[models_dir]
+      else
+        model_dirs = [models_dir]
       end
       models_dir = Rails.root.join(models_dir)
+      model_dirs = model_dirs.map{|d| Rails.root.join(d)}
 
       if options[:all_models]
         # Include also models from plugins
         model_dirs = $:.grep(/\/models\/?\Z/)
-      else
-        # Only main application models
-        model_dirs = [models_dir]
       end
 
       models = []
