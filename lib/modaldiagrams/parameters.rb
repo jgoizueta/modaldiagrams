@@ -14,7 +14,20 @@ module ModalDiagrams
       :sti_fields => true,                       # show fields of STI classes where declared if using modalfields
       :unified_polymorphic => false,             # unify the circled end of polymorphic associations
       :no_association_labels=>false,             # don't show association labels
-      :output_tools => %w{dot fdp neato}         # graphviz styles (tools) used whe generating output (ps/png/pdf)
+      :output_tools => %w{dot fdp neato},        # graphviz styles (tools) used whe generating output (ps/png/pdf)
+      :type_abbreviations => {                   # abbreviations used for field types
+        :date=>'d',
+        :datetime=>'dt',
+        :timestamp=>'ts',
+        :boolean=>'b',
+        :integer=>'i',
+        :string=>'s',
+        :text=>'tx',
+        :float=>'f',
+        :decimal=>'d',
+        :geometry=>'g',
+        :spatial=>'g'
+      }
     ].merge Settings.load(Rails.root.join('config','modal_diagrams.yml'))
   end
 

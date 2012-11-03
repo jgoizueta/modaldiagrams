@@ -6,20 +6,6 @@ require 'modalsupport'
 
 module ModalDiagrams
 
-  # Field type abbreviations
-  TYPE = {
-    :date=>'d',
-    :datetime=>'dt',
-    :timestamp=>'ts',
-    :boolean=>'b',
-    :integer=>'i',
-    :string=>'s',
-    :text=>'tx',
-    :float=>'f',
-    :decimal=>'d',
-    :geometry=>'g'
-  }
-
   class <<self
 
     def enable_clusters
@@ -57,7 +43,7 @@ module ModalDiagrams
       models.each do |cls|
         if cls.respond_to?(:reflect_on_all_associations) && ActiveRecord::Base.connection.table_exists?(cls.table_name)
           # Note: Don't use content_columns ignores columns ending with _id which I use for enum fields
-          columns = cls.columns.reject { |c| c.primary || c.name =~ /(_count)$/ || c.name == cls.inheritance_column || c.name =~ /^(created_at|updated_at)$/ }.map{|c| "#{c.name} : #{TYPE[c.type]}"}
+          columns = cls.columns.reject { |c| c.primary || c.name =~ /(_count)$/ || c.name == cls.inheritance_column || c.name =~ /^(created_at|updated_at)$/ }.map{|c| field_spec(cfg, c)}
           columns_to_ignore = cls.reflect_on_all_associations.map{|a|
             cols = []
             if a.macro == :belongs_to
@@ -162,7 +148,7 @@ module ModalDiagrams
             cluster = ""
           end
           if cfg.sti_fields && sti_class.respond_to?(:fields_info) && sti_class.fields_info!=:omitted
-            columns = sti_class.fields_info.map{|c| "#{c.name} : #{TYPE[c.type]}"}
+            columns = sti_class.fields_info.map{|c| field_spec(cfg, c)}
             columns = columns.to(cfg.max_attributes) + ['...'] if columns.size > cfg.max_attributes
           else
             columns = nil
@@ -328,6 +314,11 @@ module ModalDiagrams
 
     def add_diagram_footer(f)
       f.puts "}\n"
+    end
+
+    def field_spec(cfg, c)
+      type = cfg.type_abbreviations[c.type] || c.type
+      "#{c.name} : #{type}"
     end
 
   end
