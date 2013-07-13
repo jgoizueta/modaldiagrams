@@ -174,6 +174,7 @@ module ModalDiagrams
         all_classes = []
         classes.keys.each do |cluster|
           next if cluster.in? cfg.clusters_not_shown_on_main_diagram
+          next if cluster_classes[cluster].nil?
           all_classes += cluster_classes[cluster]
           cluster_id += 1
           add_diagram_classes f, classes[cluster], cluster, cluster_id, cfg.show_cluster_boxes
@@ -298,6 +299,7 @@ module ModalDiagrams
     def add_diagram_relations(f, relations, relation_classes, inner_classes, show_external)
       relations.each_index do |i|
         relation = relations[i]
+        inner_classes = Array(inner_classes)
         is_internal = relation_classes[i].all?{|c| c.in? inner_classes}
         is_external = relation_classes[i].any?{|c| c.in? inner_classes} && !is_internal
         if show_external
