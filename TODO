@@ -1,2 +1,4 @@
 TODO
 *  Write tests (use simple demo data model whose diagrams will serve as a generic diagram legend as well)
+*  If the use of requires_presence_of with has_many and has_one associations could be detected, specific
+   arrowheads could be used for "one or more" (e.g. crowtee) and "one only" (e.g. teetee) associations.

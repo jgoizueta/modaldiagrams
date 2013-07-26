@@ -27,6 +27,12 @@ module ModalDiagrams
         :decimal=>'d',
         :geometry=>'g',
         :spatial=>'g'
+      },
+      :arrow_heads => {
+        :multiple => 'dot',       # zero or more (crowodot for standard ERD notation)
+        :single   => 'tee',       # zero or one  (teeodot for standard ERD notation),
+        :poly_multiple => 'odot', # polymorphic zero or more
+        :poly_single => 'obox'    # polymorphic zero or more
       }
     ].merge Settings.load(Rails.root.join('config','modal_diagrams.yml'))
   end

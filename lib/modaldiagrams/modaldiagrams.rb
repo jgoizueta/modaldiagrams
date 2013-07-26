@@ -121,13 +121,13 @@ module ModalDiagrams
               case type
               when :one_to_one
                 tail = "none"
-                head = poly ? "obox" : "tee" # mark the end with the foreign key
+                head = poly ? cfg.arrow_heads.poly_single : cfg.arrow_heads.single # mark the end with the foreign key
               when :one_to_many
                 tail = "none"
-                head = poly ? "odot" : "dot"
+                head = poly ? cfg.arrow_heads.poly_multiple : cfg.arrow_heads.multiple
               when :many_to_many
-                tail = "dot"
-                head = "dot"
+                tail = cfg.arrow_heads.multiple
+                head = cfg.arrow_heads.multiple
               end
               samehead = (cfg.unified_polymorphic && label) ? %{, samehead="#{label}"} : ''
               label = nil if cfg.no_association_labels
