@@ -227,7 +227,7 @@ module ModalDiagrams
       models = []
       files = {}
       model_dirs.each do |base|
-        Dir.glob(File.join(base,"**/*.rb")).each do |fn|
+        Dir.glob(File.join(base,"*.rb")).each do |fn|
           model = File.basename(fn).chomp(".rb").camelize.constantize
           models << model
           files[model.to_s] = fn
