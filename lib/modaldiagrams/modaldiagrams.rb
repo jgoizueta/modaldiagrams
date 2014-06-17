@@ -35,10 +35,12 @@ module ModalDiagrams
       model_selection_options = {
           :all_models => cfg.include_all_models,
           :dynamic_models => cfg.include_dynamic_models,
-          :include_files => false
+          :include_files => false,
+          :exclude_models => cfg.exclude_models
       }
 
-      models = dbmodels(model_selection_options.merge(:exclude_sti_models => true))
+      models, excluded_models = dbmodels(model_selection_options.merge(:exclude_sti_models => true))
+      excluded_class_names = excluded_models.map(&:name)
 
       models.each do |cls|
         if cls.respond_to?(:reflect_on_all_associations) && ActiveRecord::Base.connection.table_exists?(cls.table_name)
@@ -72,6 +74,7 @@ module ModalDiagrams
           cluster_classes[cluster] ||= []
           cluster_classes[cluster] << cls.to_s
           cls.reflect_on_all_associations.each do |assoc|
+            next if assoc.class_name.in?(excluded_class_names)
             target,type = nil,nil
             case assoc.macro
             when :has_many
@@ -139,7 +142,7 @@ module ModalDiagrams
       end
 
       if cfg.show_sti
-        sti_classes = dbmodels(model_selection_options.merge(:exclude_non_sti_models => true))
+        sti_classes, exc = dbmodels(model_selection_options.merge(:exclude_non_sti_models => true))
         sti_classes.each do |sti_class|
           cls = sti_class.base_class
           if cls.respond_to?(:cluster)
@@ -205,6 +208,7 @@ module ModalDiagrams
     #   :dynamic_models            # Return dynamically defined models too (not defined in a model file)
     #   :exclude_sti_models        # Exclude derived (STI) models
     #   :exclude_non_sti_models    # Exclude top level models
+    #   :exclude_models            # Array of models to exclude from the diagrams
     #   :include_files             # Return also the model definition file pathnames (return pairs of [model, file])
     #   :only_app_files            #   But return nil for files not in the app proper
     #   :only_app_tree_files       #   But return nil for files not in the app directory tree (app, vendor...)
@@ -247,8 +251,17 @@ module ModalDiagrams
       non_sti_models, sti_models = models.partition{|model| model.base_class==model}
 
       models = []
-      models += non_sti_models unless options[:exclude_non_sti_models]
-      models += sti_models unless options[:exclude_sti_models]
+      excluded_models = []
+      if options[:exclude_non_sti_models]
+        excluded_models += non_sti_models
+      else
+        models += non_sti_models
+      end
+      if options[:exclude_sti_models]
+        excluded_models += sti_models
+      else
+        models += sti_models
+      end
       if options[:include_files]
         models = models.map{|model| [model, files[model.to_s]]}
         if options[:only_app_files] || options[:only_app_tree_files]
@@ -261,7 +274,12 @@ module ModalDiagrams
           models = models.map{|model, file| [model, file && (file.starts_with?(suffix) ? file : nil)]}
         end
       end
-      models
+      excluded_models = []
+      if options[:exclude_models].present?
+        excluded_models = Array(options[:exclude_models]).map{|m| String===m ? m.constantize : m}
+        models -= excluded_models
+      end
+      [models, excluded_models]
     end
 
     def has_table?(cls)
