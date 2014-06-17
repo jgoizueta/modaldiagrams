@@ -1,3 +1,4 @@
+require 'modaldiagrams/version'
 require 'modaldiagrams/parameters'
 require 'modaldiagrams/modaldiagrams'
 
