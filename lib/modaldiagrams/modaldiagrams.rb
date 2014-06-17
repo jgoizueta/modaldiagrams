@@ -170,7 +170,7 @@ module ModalDiagrams
       end
 
       fn = Rails.root.join('db/diagrams/diagram.dot')
-      mkdir_p fn.dirname
+      FileUtils.mkdir_p fn.dirname
       File.open(fn,'w') do |f|
         add_diagram_header f
         cluster_id = 0
